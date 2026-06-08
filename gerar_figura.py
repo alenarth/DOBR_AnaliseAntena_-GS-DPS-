@@ -1,20 +1,18 @@
-"""Gera a figura do relatorio DPS: E(x) e E'(x) lado a lado verticalmente,
-mostrando que os pontos criticos de E coincidem com os zeros de E'."""
-
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
-# --- Funcoes ---------------------------------------------------------------
+# Funcoes do modelo
+
 def E(x):
     return -(x**6)/6 + 15*(x**5)/5 - 85*(x**4)/4 + 225*(x**3)/3 - 274*(x**2)/2 + 120*x
 
 def dE(x):
     return -(x**5) + 15*(x**4) - 85*(x**3) + 225*(x**2) - 274*x + 120
 
-# --- Dados -----------------------------------------------------------------
+# Dados e pontos de interesse
 x = np.linspace(0, 5.45, 1200)
 crit = [1, 2, 3, 4, 5]
 maximos = [1, 3, 5]
@@ -30,12 +28,12 @@ AREIA  = "#eef2f7"
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7.4, 7.6), sharex=True,
                                gridspec_kw={"height_ratios": [1.45, 1]})
 
-# ===================== Painel de cima: E(x) ================================
-# Faixa de alta eficiencia (x de 1 a 5)
+# Painel de cima: E(x)
+# Marca a faixa de alta eficiencia e plota a curva E(x).
 ax1.axvspan(1, 5, color=AREIA, zorder=0)
 ax1.plot(x, E(x), color=AZUL, lw=2.4, zorder=3)
 
-# Maximos e minimos
+# Maximos e minimos locais
 for xm in maximos:
     ax1.plot(xm, E(xm), "^", color=VERM, ms=11, zorder=5,
              markeredgecolor="white", markeredgewidth=1.2)
@@ -43,7 +41,7 @@ for xn in minimos:
     ax1.plot(xn, E(xn), "o", color=AZUL, ms=9, zorder=5,
              markeredgecolor="white", markeredgewidth=1.2)
 
-# Destaque do ponto recomendado x=3
+# Destaque do ponto recomendado x = 3
 ax1.plot(3, E(3), "*", color=VERDE, ms=22, zorder=6,
          markeredgecolor="white", markeredgewidth=1.3)
 ax1.annotate("RECOMENDADO\nx = 3  (300 m)\nmaximo mais plano",
@@ -51,7 +49,7 @@ ax1.annotate("RECOMENDADO\nx = 3  (300 m)\nmaximo mais plano",
              fontsize=9, color=VERDE, fontweight="bold", ha="center",
              arrowprops=dict(arrowstyle="->", color=VERDE, lw=1.4))
 
-# Rotulos dos picos
+# Rotulos para os picos mais sensiveis
 ax1.annotate("pico agudo\n(sensivel)", xy=(1, E(1)), xytext=(0.35, 31),
              fontsize=8, color=VERM, ha="center",
              arrowprops=dict(arrowstyle="->", color=VERM, lw=1.1))

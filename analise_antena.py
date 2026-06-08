@@ -1,78 +1,26 @@
-"""
-analise_antena.py - DPS (Differentiated Problem Solving) | Global Solution 2026
-
-PROBLEMA
---------
-A eficiencia de um sinal de satelite em funcao da altura 'x' de uma antena em
-relacao ao solo (x medido em CENTENAS DE METROS) e modelada por:
-
-    E(x) = -x^6/6 + 15x^5/5 - 85x^4/4 + 225x^3/3 - 274x^2/2 + 120x
-
-Queremos a altura que combine boa eficiencia, estabilidade operacional
-(eficiencia que varia pouco -> longe de picos muito sensiveis) e menor custo
-estrutural (custo cresce com a altura).
-
-ESTRATEGIA
-----------
-1) Pontos criticos sao as raizes de E'(x). Vamos acha-las com NEWTON-RAPHSON.
-2) Classificamos cada ponto critico (maximo/minimo) pelo sinal de E''(x).
-3) Medimos a "sensibilidade" de cada extremo por |E''| (quanto MENOR, mais
-   plano -> mais estavel -> mais desejavel operacionalmente).
-4) Cruzamos eficiencia, estabilidade e custo para recomendar uma altura.
-
-Implementacao em Python puro (so biblioteca padrao), para deixar explicito
-que o metodo numerico foi implementado a mao, nao chamado de uma biblioteca.
-"""
-
-# ===========================================================================
-# 1. A FUNCAO E SUAS DERIVADAS
-# ===========================================================================
-#
-# E'(x) sai limpa porque a funcao foi montada como a primitiva de
-#        E'(x) = -(x-1)(x-2)(x-3)(x-4)(x-5).
-# Expandindo o produto:
-#        E'(x) = -x^5 + 15x^4 - 85x^3 + 225x^2 - 274x + 120
-# E derivando de novo:
-#        E''(x) = -5x^4 + 60x^3 - 255x^2 + 450x - 274
-
-
 def E(x):
-    """Eficiencia do sinal na altura x (x em centenas de metros)."""
+    # Eficiencia do sinal na altura x (x em centenas de metros).
     return (-(x**6) / 6 + 15 * (x**5) / 5 - 85 * (x**4) / 4
             + 225 * (x**3) / 3 - 274 * (x**2) / 2 + 120 * x)
 
 
 def dE(x):
-    """Primeira derivada E'(x). Suas raizes sao os pontos criticos."""
+    # Primeira derivada E'(x); zeros de dE sao pontos criticos de E.
     return -(x**5) + 15 * (x**4) - 85 * (x**3) + 225 * (x**2) - 274 * x + 120
 
 
 def d2E(x):
-    """Segunda derivada E''(x). O sinal classifica max/min; |E''| mede a
-    'sensibilidade' (curvatura) do extremo."""
+    # Segunda derivada E''(x); o sinal classifica maximos e minimos.
     return -5 * (x**4) + 60 * (x**3) - 255 * (x**2) + 450 * x - 274
 
 
-# ===========================================================================
-# 2. METODO DE NEWTON-RAPHSON
-# ===========================================================================
-#
-# Para achar um ZERO de uma funcao f, Newton-Raphson parte de um chute x0 e
-# repete:
-#        x_{n+1} = x_n - f(x_n) / f'(x_n)
-# ate a correcao ficar menor que uma tolerancia.
-#
-# Como aqui queremos os zeros de E' (os pontos criticos de E), usamos
-# f = E'  e  f' = E''. Logo a iteracao fica:
-#        x_{n+1} = x_n - E'(x_n) / E''(x_n)
-
+# 2. Metodo de Newton-Raphson
+# Newton usa x_{n+1} = x_n - f(x_n) / f'(x_n).
+# Aqui buscamos zeros de E' usando f = E' e df = E''.
 
 def newton_raphson(f, df, x0, tol=1e-10, max_iter=100):
-    """Acha uma raiz de f a partir do chute x0.
-
-    Retorna (raiz, num_iteracoes, convergiu). Robusto: se a derivada ficar
-    perto de zero (risco de divisao por zero), aborta sem travar.
-    """
+    # Encontra uma raiz de f a partir do chute x0.
+    # Retorna (raiz, num_iteracoes, convergiu).
     x = float(x0)
     for i in range(1, max_iter + 1):
         fx = f(x)
@@ -87,11 +35,7 @@ def newton_raphson(f, df, x0, tol=1e-10, max_iter=100):
 
 
 def encontrar_pontos_criticos(seeds, tol=1e-10, casas=6):
-    """Roda Newton-Raphson a partir de varios chutes e junta as raizes
-    distintas encontradas (arredondando para evitar duplicatas numericas).
-
-    Retorna uma lista de dicionarios, um por ponto critico, ja ordenada.
-    """
+    # Tenta varios chutes e devolve raizes distintas de E'.
     encontradas = []
     for s in seeds:
         raiz, iters, convergiu = newton_raphson(dE, d2E, s, tol=tol)
@@ -105,11 +49,8 @@ def encontrar_pontos_criticos(seeds, tol=1e-10, casas=6):
 
 
 def classificar(x):
-    """Classifica o ponto critico x pelo teste da segunda derivada.
-
-    E''(x) < 0 -> maximo local ; E''(x) > 0 -> minimo local ; ~0 -> indefinido.
-    Retorna (tipo, valor_de_E, valor_de_E2).
-    """
+    # Classifica o ponto critico x com base em E''(x).
+    # E'' < 0 -> maximo ; E'' > 0 -> minimo ; proximo de zero -> indefinido.
     e2 = d2E(x)
     if e2 < -1e-9:
         tipo = "MAXIMO"
